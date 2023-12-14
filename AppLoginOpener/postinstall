@@ -1,0 +1,56 @@
+#!/bin/sh
+## postinstall
+
+pathToScript=$0
+pathToPackage=$1
+targetLocation=$2
+targetVolume=$3
+
+plistName="com.jamfstudentopener.launchagent"
+
+# FEU
+# Get home directories of existing users
+for user in $(dscl . list /Users UniqueID | awk '$2>500 {print $1}');do
+	echo $user
+homePath=$(dscl . read /Users/"$user" NFSHomeDirectory | awk '{print $2}')
+
+launchAgent_path="$homePath/Library/LaunchAgents/$plistName.plist"
+# Write the plist to each users home dir
+tee > $launchAgent_path << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jamfstudentopener.launchagent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>/usr/local/bin/check_and_notify.sh</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/com.jamfstudentopener.launchagent.out</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.jamfstudentopener.launchagent.err</string>
+</dict>
+</plist>
+
+EOF
+
+# Ownership and Permissions
+chmod 644 "$launchAgent_path"
+chown "$user":staff "$launchAgent_path"
+
+done
+
+
+
+exit 0		## Success
+exit 1		## Failure
