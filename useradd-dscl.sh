@@ -2,7 +2,7 @@
 dscl . -create /Users/user
 dscl . -create /Users/user UserShell /bin/bash
 dscl . -create /Users/user RealName "user" 
-dscl . -create /Users/user UniqueID "401"
+dscl . -create /Users/user UniqueID "601"
 dscl . -create /Users/user PrimaryGroupID 20
 dscl . -create /Users/user NFSHomeDirectory /Users/user
 dscl . -passwd /Users/user mypassword
